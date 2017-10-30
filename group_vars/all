@@ -1,0 +1,6 @@
+---
+httpd_servername: www.dneo.local
+postgres_su_user: postgres
+postgres_su_pass: postgres
+dneo_filename: dneoV40R10pg96lRE6.tar.gz
+dneo_download_url: https://www.desknets.com/binary/neo/linuxpg96/dneoV40R10pg96lRE6.tar.gz

@@ -1,0 +1,73 @@
+---
+- name: Download desknet's NEO
+  get_url:
+    url: "{{ dneo_download_url }}"
+    dest: "/tmp/{{ dneo_filename }}"
+
+- name: Unarchive the tarball
+  unarchive:
+    src: "/tmp/{{ dneo_filename }}"
+    dest: /var/www/cgi-bin/
+    remote_src: yes
+    creates: /var/www/cgi-bin/dneosp
+
+- name: Move static contents
+  command: mv /var/www/cgi-bin/{{ item }} /var/www/html/.
+  with_items:
+    - "dneo/dneores"
+    - "dneo/dneowmlroot"
+    - "dneosp/dneospres"
+  args:
+    creates: /var/www/html/dneospres
+
+#- name: Copy static contents
+#  copy:
+#    src: "/var/www/cgi-bin/dneo/{{ item }}"
+#    dest: /var/www/html/
+#    remote_src: yes
+#    #creates: "/var/www/html/{{ item }}"
+#  with_items:
+#    - "dneores"
+#    - "dneowmlroot"
+#    - "dneospres"
+#
+#- name: Delete copied static contents
+#  file:
+#    path: "/var/www/cgi-bin/dneo/{{ item }}"
+#    state: absent
+#  with_items:
+#    - dneores
+#    - dneowmlroot
+#    - dneospres
+
+#psql -d template1 -c "CREATE USER dneo WITH PASSWORD 'desknetsNeo_PgSql' CREATEROLE"
+- name: Create postgresql user
+  postgresql_user:
+    db: template1
+    login_user: "{{ postgres_su_user }}"
+    login_password: "{{ postgres_su_pass }}"
+    name: dneo
+    password: desknetsNeo_PgSql
+    priv: "ALL"
+
+#pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneodb.pgdmp
+- name: Restore dneo database
+  shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneodb.pgdmp"
+
+#pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneologdb.pgdmp
+- name: Restore accesslog database
+  shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneologdb.pgdmp"
+
+#psql -d template1 -c "CREATE USER dneofts WITH PASSWORD 'dneofts' CREATEROLE"
+- name: Create file search role
+  postgresql_user:
+    db: template1
+    login_user: "{{ postgres_su_user }}"
+    login_password: "{{ postgres_su_pass }}"
+    name: dneofts
+    password: dneofts
+    priv: "ALL"
+
+#pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneoftsdb.pgdmp
+- name: Restore file search database
+  shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneoftsdb.pgdmp"

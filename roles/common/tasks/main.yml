@@ -1,0 +1,30 @@
+---
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: present
+
+- name: Install Vim
+  yum:
+    name: vim-enhanced
+    state: present
+
+- name: Install chrony
+  yum:
+    name: chrony
+    state: present
+- name: Start and enable chrony
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+
+- name: Disable Firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
