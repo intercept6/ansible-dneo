@@ -1,6 +1,7 @@
 ---
 - name: desknet's NEO install and configure
   hosts: all
+  remote_user: root
   become: true
 
   roles:

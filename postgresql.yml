@@ -1,6 +1,7 @@
 ---
 - name: Install and configure PostgreSQL 9.6
   hosts: all
+  remote_user: root
   become: true
 
   roles:

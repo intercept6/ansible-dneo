@@ -1,6 +1,7 @@
 ---
 - name: Install and configure httpd
   hosts: all
+  remote_user: root
   become: true
 
   roles:

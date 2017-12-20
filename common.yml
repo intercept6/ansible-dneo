@@ -1,6 +1,7 @@
 ---
 - name: Common configure
   hosts: all
+  remote_user: root
   become: true
 
   roles:
