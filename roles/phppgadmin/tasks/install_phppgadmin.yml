@@ -1,19 +1,19 @@
 ---
 - name: Install phpPgAdmin
-  yum: 
-    state: latest
+  yum:
+    state: present
     enablerepo: epel
     name: phpPgAdmin
 
 #- name: Allow http
 #  firewalld:
-#    service: http
+#    systemd: http
 #    permanent: true
 #    state: enabled
 #    immediate: yes
 
 - name: Start and enable httpd
-  service:
+  systemd:
     name: httpd
     state: started
     enabled: yes

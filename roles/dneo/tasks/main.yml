@@ -12,33 +12,13 @@
     creates: /var/www/cgi-bin/dneosp
 
 - name: Move static contents
-  command: mv /var/www/cgi-bin/{{ item }} /var/www/html/.
+  shell: mv /var/www/cgi-bin/{{ item }} /var/www/html/.
   with_items:
     - "dneo/dneores"
     - "dneo/dneowmlroot"
     - "dneosp/dneospres"
   args:
     creates: /var/www/html/dneospres
-
-#- name: Copy static contents
-#  copy:
-#    src: "/var/www/cgi-bin/dneo/{{ item }}"
-#    dest: /var/www/html/
-#    remote_src: yes
-#    #creates: "/var/www/html/{{ item }}"
-#  with_items:
-#    - "dneores"
-#    - "dneowmlroot"
-#    - "dneospres"
-#
-#- name: Delete copied static contents
-#  file:
-#    path: "/var/www/cgi-bin/dneo/{{ item }}"
-#    state: absent
-#  with_items:
-#    - dneores
-#    - dneowmlroot
-#    - dneospres
 
 #psql -d template1 -c "CREATE USER dneo WITH PASSWORD 'desknetsNeo_PgSql' CREATEROLE"
 - name: Create postgresql user
@@ -50,13 +30,29 @@
     password: desknetsNeo_PgSql
     priv: "ALL"
 
+- name: Check dneo database
+  shell: "psql -l | grep dneodb | wc -l"
+  register: dneodb_exist
+  become_method: su
+  become_user: "{{ postgres_su_user  }}"
+  changed_when: False
+
 #pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneodb.pgdmp
 - name: Restore dneo database
   shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneodb.pgdmp"
+  when: dneodb_exist.stdout == "0"
+
+- name: Check accesslog database
+  shell: "psql -l | grep dneologdb | wc -l"
+  register: dneologdb_exist
+  become_method: su
+  become_user: "{{ postgres_su_user  }}"
+  changed_when: False
 
 #pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneologdb.pgdmp
 - name: Restore accesslog database
   shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneologdb.pgdmp"
+  when: dneologdb_exist.stdout == "0"
 
 #psql -d template1 -c "CREATE USER dneofts WITH PASSWORD 'dneofts' CREATEROLE"
 - name: Create file search role
@@ -68,6 +64,14 @@
     password: dneofts
     priv: "ALL"
 
+- name: Check dneoftsdb database
+  shell: "psql -l | grep dneoftsdb | wc -l"
+  register: dneoftsdb_exist
+  become_method: su
+  become_user: "{{ postgres_su_user  }}"
+  changed_when: False
+
 #pg_restore -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneoftsdb.pgdmp
 - name: Restore file search database
   shell: "pg_restore -w -U {{ postgres_su_user }} -C -Fc -d template1 /var/www/cgi-bin/dneo/dump/dneoftsdb.pgdmp"
+  when: dneoftsdb_exist.stdout == "0"

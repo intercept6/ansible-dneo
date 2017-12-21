@@ -11,7 +11,7 @@
   when: not dbcluster.stat.exists
 
 - name: Start and enable PostgreSQL
-  service:
+  systemd:
     name: postgresql-9.6.service 
     state: started
     enabled: yes

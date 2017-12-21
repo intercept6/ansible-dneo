@@ -1,6 +1,13 @@
 ---
-- name: install PostgreSQL 9.6
-  yum: 
+- name: Install EPEL
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - epel-release
+
+- name: Install PostgreSQL 9.6
+  yum:
     name:
       - postgresql96-contrib
       - postgresql96-devel

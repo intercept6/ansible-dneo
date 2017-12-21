@@ -1,26 +1,27 @@
 ---
-- name: Upgrade all packages
-  yum:
-    name: '*'
-    state: present
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname  }}"
 
-- name: Install Vim
-  yum:
-    name: vim-enhanced
-    state: present
+- name: Configure Hosts
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
 
-- name: Install chrony
-  yum:
-    name: chrony
-    state: present
-- name: Start and enable chrony
-  service:
-    name: chronyd
-    state: started
-    enabled: yes
 
-- name: Disable Firewalld
-  service:
+- name: Install common packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - epel-release
+
+- name: Disable firewalld
+  systemd:
     name: firewalld
     state: stopped
     enabled: no
@@ -28,3 +29,16 @@
 - name: Disable SELinux
   selinux:
     state: disabled
+
+- name: Reboot. If SELinux status is not disable
+  shell: sleep 2 && shutdown -r now "reboot"
+  become: yes
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: ansible_selinux.status != "disabled"
+
+- name: Wait reboot. If SELinux status is not disable
+  local_action: wait_for host={{ ansible_host }} port=22 delay=30 state=started
+  become: false
+  when: ansible_selinux.status != "disabled"

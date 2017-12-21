@@ -11,4 +11,5 @@
     state: latest
 
 - name: Disable PostgreSQL 9.6 repository
-  command: yum-config-manager --disable pgdg96
+  shell: yum-config-manager --disable pgdg96
+  changed_when: False

@@ -1,9 +1,9 @@
-- name: Apache(httpd) インストール
+- name: Install httpd
   yum:
     name: httpd
     state: present
 
-- name: httpd.conf 設定
+- name: Copy httpd.conf
   template:
     src: templates/httpd.conf.j2
     dest: /etc/httpd/httpd.conf
@@ -11,7 +11,7 @@
     group: root
     mode: 0644
 
-- name: サービス 設定
+- name: Set automatic start of httpd
   systemd:
     name: httpd
     state: started
